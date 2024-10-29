@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart' as syspaths;
 import 'package:path/path.dart' as path;
+import 'package:sqflite/sqflite.dart';
 import 'package:test_multipart/models/models.dart';
 import 'package:test_multipart/providers/databases.dart';
+
+const table = 'images';
 
 class ImagesProvider extends StateNotifier<List<ImageObject>> {
   ImagesProvider() : super([]);
@@ -11,7 +14,7 @@ class ImagesProvider extends StateNotifier<List<ImageObject>> {
   Future<void> loadImagesFromDatabase() async {
     final db = await getDatabase();
 
-    var imageListQuery = await db.query('images');
+    var imageListQuery = await db.query(table);
 
     final List<ImageObject> imageList = imageListQuery
         .map((row) => ImageObject(
@@ -32,12 +35,30 @@ class ImagesProvider extends StateNotifier<List<ImageObject>> {
         filename + imageObject.timestamp.millisecondsSinceEpoch.toString();
     final savedImage =
         await imageObject.image.copy('${appDir.path}/$newFilename');
+
+    final db = await getDatabase();
+    await db.insert(
+      table,
+      {
+        'id': imageObject.id,
+        'image_path': savedImage.path,
+        'timestamp': imageObject.timestamp.millisecondsSinceEpoch,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    db.close();
+
     state = [...state, ImageObject(image: savedImage)];
   }
 
-  void removeImage(String id) {
+  void removeImage(String id) async {
     File image = state.firstWhere((element) => element.id == id).image;
     image.delete();
+
+    final db = await getDatabase();
+    db.delete(table, where: 'id = ?', whereArgs: [id]);
+    db.close();
+
     state.removeWhere((element) => element.id == id);
   }
 }
