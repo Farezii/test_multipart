@@ -20,8 +20,7 @@ class ImagesProvider extends StateNotifier<List<ImageObject>> {
         .map((row) => ImageObject(
               image: File(row['image_path'] as String),
               id: row['id'] as String,
-              timestamp:
-                  DateTime.fromMillisecondsSinceEpoch(row['timestamp'] as int),
+              timestamp: DateTime.parse(row['timestamp'] as String),
             ))
         .toList();
 
@@ -42,7 +41,7 @@ class ImagesProvider extends StateNotifier<List<ImageObject>> {
       {
         'id': imageObject.id,
         'image_path': savedImage.path,
-        'timestamp': imageObject.timestamp.millisecondsSinceEpoch,
+        'timestamp': imageObject.timestamp.toString(),
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );

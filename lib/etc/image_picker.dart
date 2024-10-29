@@ -6,7 +6,7 @@ class ImageInput extends StatefulWidget {
   const ImageInput(
       {super.key,
       required this.onPickImage,
-      this.photoContainerTitle = 'Take picture'});
+      this.photoContainerTitle = 'picture'});
 
   final void Function(File image) onPickImage;
   // onPickImage = (image) {
