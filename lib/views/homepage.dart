@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_multipart/etc/modal_sheets.dart';
+import 'package:test_multipart/http/request_handler.dart';
 import 'package:test_multipart/models/models.dart';
 import 'package:test_multipart/providers/imagesProvider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +13,13 @@ class ImageListView extends ConsumerStatefulWidget {
 }
 
 class _ImageListViewState extends ConsumerState<ImageListView> {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(imageProvider.notifier).loadImagesFromDatabase();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final imageListProvider = ref.watch(imageProvider);
@@ -20,6 +28,22 @@ class _ImageListViewState extends ConsumerState<ImageListView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Image List'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.upload),
+            onPressed: () {
+              // uploadImages(imageListProvider);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.clear_all),
+            onPressed: () {
+              for (ImageObject image in imageListProvider) {
+                imageNotifier.removeImage(image.id);
+              }
+            },
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: imageListProvider.length,
