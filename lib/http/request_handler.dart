@@ -6,7 +6,24 @@ import 'dart:io';
 const hostname = 'http://172.28.188.65';
 const port = ':8080';
 
-Future<void> uploadImages(List<ImageObject> imageList) async {
+List<List<ImageObject>> chunkListIntoTens(List<ImageObject> imageObjectList) {
+  final List<List<ImageObject>> separatedList = [];
+  final int length = imageObjectList.length;
+  final int fullChunks = length ~/ 10;
+  final int remainingChunk = length % 10;
+
+  for (var i = 0; i < fullChunks; i++) {
+    separatedList.add(imageObjectList.sublist(i * 10, (i + 1) * 10));
+  }
+
+  if (remainingChunk > 0) {
+    separatedList.add(imageObjectList.sublist(fullChunks * 10));
+  }
+
+  return separatedList;
+}
+
+Future<void> uploadChunkImages(List<ImageObject> imageList) async {
   final uri = Uri.parse('$hostname$port/upload/');
   print('URI: $uri');
   final request = http.MultipartRequest('POST', uri);
@@ -43,5 +60,13 @@ Future<void> uploadImages(List<ImageObject> imageList) async {
     print('Upload failed with status: ${response.statusCode}');
     final responseBody = await response.stream.bytesToString();
     print('Response body: $responseBody');
+  }
+}
+
+Future<void> uploadAllImages(List<ImageObject> imageList) async {
+  final List<List<ImageObject>> separatedList = chunkListIntoTens(imageList);
+
+  for (var chunk in separatedList) {
+    await uploadChunkImages(chunk);
   }
 }

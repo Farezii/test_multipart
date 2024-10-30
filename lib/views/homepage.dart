@@ -33,7 +33,7 @@ class _ImageListViewState extends ConsumerState<ImageListView> {
           IconButton(
             icon: const Icon(Icons.upload),
             onPressed: () {
-              uploadImages(imageListProvider);
+              uploadChunkImages(imageListProvider);
             },
           ),
           IconButton(
