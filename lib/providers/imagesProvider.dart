@@ -45,7 +45,8 @@ class ImagesProvider extends StateNotifier<List<ImageObject>> {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-    db.close();
+    // Debugging purposes, put back afterwards
+    // db.close();
 
     state = [...state, ImageObject(image: savedImage)];
   }

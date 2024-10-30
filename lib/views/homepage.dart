@@ -71,9 +71,14 @@ class _ImageListViewState extends ConsumerState<ImageListView> {
         onPressed: () async {
           final newImage = await callImagePickerModalBottomSheet(context);
 
+          // Debuging purposes
+          // Remove for loop and leave newImageObject and notifier calls
           if (newImage != null) {
-            ImageObject newImageObject = ImageObject(image: newImage);
-            imageNotifier.addImage(newImageObject);
+            for (int i = 0; i < 20; i++) {
+              ImageObject newImageObject = ImageObject(image: newImage);
+              imageNotifier.addImage(newImageObject);
+              Future.delayed(const Duration(seconds: 1));
+            }
           } else {
             print('No image selected');
             return;
