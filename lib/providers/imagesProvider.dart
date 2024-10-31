@@ -56,10 +56,26 @@ class ImagesProvider extends StateNotifier<List<ImageObject>> {
     image.delete();
 
     final db = await getDatabase();
-    db.delete(table, where: 'id = ?', whereArgs: [id]);
+    await db.delete(table, where: 'id = ?', whereArgs: [id]);
     db.close();
 
     state.removeWhere((element) => element.id == id);
+  }
+
+  void removeListImages(List<ImageObject> imageList) async {
+    final db = await getDatabase();
+    List<String> idsToRemove = [];
+
+    for (var image in imageList) {
+      image.image.delete();
+      await db.delete(table, where: 'id = ?', whereArgs: [image.id]);
+      idsToRemove.add(image.id);
+    }
+
+    db.close();
+
+    state =
+        state.where((element) => !idsToRemove.contains(element.id)).toList();
   }
 }
 
