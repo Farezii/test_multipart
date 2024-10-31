@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:test_multipart/etc/modal_sheets.dart';
 import 'package:test_multipart/http/request_handler.dart';
@@ -32,16 +35,22 @@ class _ImageListViewState extends ConsumerState<ImageListView> {
         actions: [
           IconButton(
             icon: const Icon(Icons.upload),
-            onPressed: () {
-              uploadChunkImages(imageListProvider);
+            onPressed: () async {
+              List<ImageObject> successfulUploads =
+                  await uploadAllImages(imageListProvider, context);
+              imageNotifier.removeListImages(successfulUploads);
             },
           ),
           IconButton(
             icon: const Icon(Icons.clear_all),
             onPressed: () {
-              for (ImageObject image in imageListProvider) {
-                imageNotifier.removeImage(image.id);
-              }
+              imageNotifier.removeListImages(imageListProvider);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.numbers),
+            onPressed: () {
+              print('Number of images: ${imageListProvider.length}');
             },
           ),
         ],
@@ -74,8 +83,10 @@ class _ImageListViewState extends ConsumerState<ImageListView> {
           // Debuging purposes
           // Remove for loop and leave newImageObject and notifier calls
           if (newImage != null) {
-            for (int i = 0; i < 20; i++) {
-              ImageObject newImageObject = ImageObject(image: newImage);
+            for (int i = 0; i < 116; i++) {
+              File newCopiedImage =
+                  await newImage.copy(newImage.path + i.toString());
+              ImageObject newImageObject = ImageObject(image: newCopiedImage);
               imageNotifier.addImage(newImageObject);
               Future.delayed(const Duration(seconds: 1));
             }
